@@ -1,8 +1,8 @@
 module Awari
 ///  Each player has a set of regular pits and one home pit. A pit holds zero or more beans
-type pit = // Notes: Could hold a non-negative integer representing the amount of balls.
+type pit = {cell : int; mutable amount : int}
 /// A board consists of pits.
-type board = // Notes: A list of pits.
+type board = {Player1Side : pit list; Player2Side : pit list; score : pit * pit}
 /// A game is played between two players
 type player = Player1 | Player2
 
@@ -30,7 +30,7 @@ val printBoard : b:board -> unit
 /// <param name="p">The player, whos home to check</param>
 /// <param name="i">A regular or home pit of a player</param>
 /// <returns>True if either side has no beans</returns>
-val isHome : b:board -> p:player -> i:pit -> bool
+val isHome : b:board -> p:player -> i:pit -> bool// Notes: A list of pits.er -> i:pit -> bool
 
 /// <summary>
 /// Check whether the game is over
