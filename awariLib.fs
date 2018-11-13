@@ -26,7 +26,7 @@ let isHome (b : board) (p : player) (i : pit) : bool =
 let isGameOver (b : board) : bool =
   List.forall (fun x -> x.amount = 0) b.Player1Side || List.forall (fun x -> x.amount = 0) b.Player2Side
 
-let getMove (b : board) (p : player) (q : string) : pit =
+let rec getMove (b : board) (p : player) (q : string) : pit =
   match p with
   | Player1 -> 
     match q with 
@@ -36,6 +36,10 @@ let getMove (b : board) (p : player) (q : string) : pit =
     | "4" -> b.Player1Side.[3]
     | "5" -> b.Player1Side.[4]
     | "6" -> b.Player1Side.[5]
+    | _ ->
+      System.Console.WriteLine "Player 1 choose pit: "
+      let input = System.Console.ReadLine()
+      getMove b p input
   | Player2 ->
     match q with
     | "1" -> b.Player2Side.[0]
@@ -44,6 +48,47 @@ let getMove (b : board) (p : player) (q : string) : pit =
     | "4" -> b.Player2Side.[3]
     | "5" -> b.Player2Side.[4]
     | "6" -> b.Player2Side.[5]
+    | _ -> 
+      System.Console.WriteLine "Player 2 choose pit: "
+      let input = System.Console.ReadLine()
+      getMove b p input
+
+let distribute (b : board) (p : player) (i : pit) : board * player * pit =
+  let mutable opponentSide = false
+  let mutable cellNum = i.cell % 6
+  match p with 
+  | Player1 -> 
+    while i.amount <> 0 do
+      if cellNum = 0 then 
+        if not opponentSide then (fst b.score).amount <- (fst b.score).amount + 1
+        cellNum <- cellNum + 1
+        i.amount <- i.amount - 1
+        opponentSide <- not opponentSide
+      elif opponentSide then
+        b.Player2Side.[6-cellNum].amount <- b.Player2Side.[6-cellNum].amount + 1
+        cellNum <- (cellNum + 1) % 7
+        i.amount <- i.amount - 1
+      else
+        b.Player1Side.[cellNum-1].amount <- b.Player1Side.[cellNum-1].amount + 1
+        cellNum <- (cellNum + 1) % 7
+        i.amount <- i.amount - 1
+    (b, p, i)
+  | Player2 -> 
+    while i.amount <> 0 do
+      if cellNum = 0 then 
+        if not opponentSide then (snd b.score).amount <- (snd b.score).amount + 1
+        cellNum <- cellNum + 1
+        i.amount <- i.amount - 1
+        opponentSide <- not opponentSide
+      elif opponentSide then
+        b.Player1Side.[cellNum-1].amount <- b.Player1Side.[cellNum-1].amount + 1
+        cellNum <- (cellNum + 1) % 7
+        i.amount <- i.amount - 1
+      else
+        b.Player2Side.[6-cellNum].amount <- b.Player2Side.[6-cellNum].amount + 1
+        cellNum <- (cellNum + 1) % 7
+        i.amount <- i.amount - 1
+    (b, p, i)
 
 let turn (b : board) (p : player) : board =
   let rec repeat (b: board) (p: player) (n: int) : board =
