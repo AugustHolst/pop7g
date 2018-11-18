@@ -16,11 +16,11 @@ let isHome (b : board) (p : player) (i : pit) : bool =
   match p with
   | Player1 -> 
     match i with 
-    | i when i.cell = -1 -> true
+    | i when i.cell = 7 -> true
     | _ -> false
   | Player2 -> 
     match i with 
-    | i when i.cell = -2 -> true
+    | i when i.cell = 14 -> true
     | _ -> false
 
 let isGameOver (b : board) : bool =
@@ -55,40 +55,57 @@ let rec getMove (b : board) (p : player) (q : string) : pit =
 
 let distribute (b : board) (p : player) (i : pit) : board * player * pit =
   let mutable opponentSide = false
-  let mutable cellNum = i.cell % 6
+  let mutable cellNum = i.cell % 7
+  let mutable lastPit = i
   match p with 
   | Player1 -> 
     while i.amount <> 0 do
       if cellNum = 0 then 
-        if not opponentSide then (fst b.score).amount <- (fst b.score).amount + 1
-        cellNum <- cellNum + 1
-        i.amount <- i.amount - 1
+        if not opponentSide then (fst b.score).amount <- (fst b.score).amount + 1; i.amount <- i.amount - 1; lastPit <- (fst b.score)
+        cellNum <- (cellNum + 1) % 7
         opponentSide <- not opponentSide
       elif opponentSide then
-        b.Player2Side.[6-cellNum].amount <- b.Player2Side.[6-cellNum].amount + 1
+        b.Player2Side.[6-cellNum].amount <- b.Player2Side.[6-cellNum].amount + 1; lastPit <- b.Player2Side.[6-cellNum]
         cellNum <- (cellNum + 1) % 7
         i.amount <- i.amount - 1
       else
-        b.Player1Side.[cellNum-1].amount <- b.Player1Side.[cellNum-1].amount + 1
+        b.Player1Side.[cellNum-1].amount <- b.Player1Side.[cellNum-1].amount + 1; lastPit <- b.Player1Side.[cellNum-1] 
         cellNum <- (cellNum + 1) % 7
         i.amount <- i.amount - 1
-    (b, p, i)
   | Player2 -> 
     while i.amount <> 0 do
       if cellNum = 0 then 
-        if not opponentSide then (snd b.score).amount <- (snd b.score).amount + 1
-        cellNum <- cellNum + 1
-        i.amount <- i.amount - 1
+        if not opponentSide then (snd b.score).amount <- (snd b.score).amount + 1; i.amount <- i.amount - 1; lastPit <- (snd b.score)
+        cellNum <- (cellNum + 1) % 7
         opponentSide <- not opponentSide
       elif opponentSide then
-        b.Player1Side.[cellNum-1].amount <- b.Player1Side.[cellNum-1].amount + 1
+        b.Player1Side.[cellNum-1].amount <- b.Player1Side.[cellNum-1].amount + 1; lastPit <- b.Player1Side.[cellNum-1]
         cellNum <- (cellNum + 1) % 7
         i.amount <- i.amount - 1
       else
-        b.Player2Side.[6-cellNum].amount <- b.Player2Side.[6-cellNum].amount + 1
+        b.Player2Side.[6-cellNum].amount <- b.Player2Side.[6-cellNum].amount + 1; lastPit <- b.Player2Side.[6-cellNum]
         cellNum <- (cellNum + 1) % 7
         i.amount <- i.amount - 1
-    (b, p, i)
+  let lsc = lastPit.cell % 7
+  
+  //DEBUG:
+  //printfn "cell = %d lastPit.amount = %d (not (isHome b p lastPit))) = %b" lastPit.cell lastPit.amount (not (isHome b p lastPit))
+  
+  if (lastPit.amount = 1 && (not (isHome b p lastPit))) then 
+    match p with 
+    | Player1 -> 
+      (fst b.score).amount <- (fst b.score).amount + (b.Player1Side.[6-lsc].amount + b.Player2Side.[6-lsc].amount)
+      b.Player1Side.[6-lsc].amount <- 0
+      b.Player2Side.[6-lsc].amount <- 0
+    | Player2 -> 
+      (snd b.score).amount <- (snd b.score).amount + (b.Player1Side.[lsc-1].amount + b.Player2Side.[lsc-1].amount)
+      b.Player1Side.[lsc-1].amount <- 0
+      b.Player2Side.[lsc-1].amount <- 0
+  
+  //DEBUG:
+  //printfn "lsc = %d, 6-lsc = %d" lsc (6-lsc)
+
+  (b, p, lastPit)
 
 let turn (b : board) (p : player) : board =
   let rec repeat (b: board) (p: player) (n: int) : board =
