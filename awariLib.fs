@@ -86,24 +86,36 @@ let distribute (b : board) (p : player) (i : pit) : board * player * pit =
         b.Player2Side.[6-cellNum].amount <- b.Player2Side.[6-cellNum].amount + 1; lastPit <- b.Player2Side.[6-cellNum]
         cellNum <- (cellNum + 1) % 7
         i.amount <- i.amount - 1
-  let lsc = lastPit.cell % 7
   
+  let lsc = lastPit.cell % 7
   //DEBUG:
   //printfn "cell = %d lastPit.amount = %d (not (isHome b p lastPit))) = %b" lastPit.cell lastPit.amount (not (isHome b p lastPit))
   
   if (lastPit.amount = 1 && (not (isHome b p lastPit))) then 
     match p with 
-    | Player1 -> 
-      (fst b.score).amount <- (fst b.score).amount + (b.Player1Side.[6-lsc].amount + b.Player2Side.[6-lsc].amount)
-      b.Player1Side.[6-lsc].amount <- 0
-      b.Player2Side.[6-lsc].amount <- 0
-    | Player2 -> 
-      (snd b.score).amount <- (snd b.score).amount + (b.Player1Side.[lsc-1].amount + b.Player2Side.[lsc-1].amount)
-      b.Player1Side.[lsc-1].amount <- 0
-      b.Player2Side.[lsc-1].amount <- 0
+    | Player1 when not opponentSide -> 
+      if (b.Player1Side.[lsc-1].amount + b.Player2Side.[lsc-1].amount) <> 1 then
+        (fst b.score).amount <- (fst b.score).amount + (b.Player1Side.[lsc-1].amount + b.Player2Side.[lsc-1].amount)
+        b.Player1Side.[lsc-1].amount <- 0
+        b.Player2Side.[lsc-1].amount <- 0
+    | Player1 when opponentSide -> 
+      if (b.Player1Side.[6-lsc].amount + b.Player2Side.[6-lsc].amount) <> 1 then
+        (snd b.score).amount <- (snd b.score).amount + (b.Player1Side.[6-lsc].amount + b.Player2Side.[6-lsc].amount)
+        b.Player1Side.[6-lsc].amount <- 0
+        b.Player2Side.[6-lsc].amount <- 0
+    | Player2 when not opponentSide -> 
+      if (b.Player1Side.[6-lsc].amount + b.Player2Side.[6-lsc].amount) <> 1 then
+        (snd b.score).amount <- (snd b.score).amount + (b.Player1Side.[6-lsc].amount + b.Player2Side.[6-lsc].amount)
+        b.Player1Side.[6-lsc].amount <- 0
+        b.Player2Side.[6-lsc].amount <- 0
+    | Player2 when opponentSide -> 
+      if (b.Player1Side.[lsc-1].amount + b.Player2Side.[lsc-1].amount) <> 1 then
+        (fst b.score).amount <- (fst b.score).amount + (b.Player1Side.[lsc-1].amount + b.Player2Side.[lsc-1].amount)
+        b.Player1Side.[lsc-1].amount <- 0
+        b.Player2Side.[lsc-1].amount <- 0
   
   //DEBUG:
-  //printfn "lsc = %d, 6-lsc = %d" lsc (6-lsc)
+  //printfn "lsc = %d, 7-lsc = %d" lsc (7-lsc)
 
   (b, p, lastPit)
 

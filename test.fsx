@@ -16,6 +16,7 @@ printfn "%b" (isGameOver gameOverBoard)
 
 printfn "%i" (getMove gameOverBoard Player1 "5").amount
 *)
+(*
 printfn "\n Player2 moves four times after this move 4, 3, 2, 1"
 
 distribute myBoard Player2 (getMove myBoard Player2 "4")
@@ -67,5 +68,20 @@ printBoard myBoard
 printfn "\n"
 
 distribute myBoard Player2 (getMove myBoard Player2 "3")
+printBoard myBoard
+printfn "\n"
+*)
+printfn "\n Player1 moves pit 4 and then 1"
+distribute myBoard Player1 (getMove myBoard Player1 "4")
+printBoard myBoard
+printfn "\n"
+distribute myBoard Player1 (getMove myBoard Player1 "1")
+printBoard myBoard
+printfn "\n"
+printfn "\n Player2 moves pit 3 and then 6"
+distribute myBoard Player2 (getMove myBoard Player2 "3")
+printBoard myBoard
+printfn "\n"
+distribute myBoard Player2 (getMove myBoard Player2 "6")
 printBoard myBoard
 printfn "\n"
