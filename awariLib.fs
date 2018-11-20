@@ -25,31 +25,32 @@ let isHome (b : board) (p : player) (i : pit) : bool =
 
 let isGameOver (b : board) : bool =
   List.forall (fun x -> x.amount = 0) b.Player1Side || List.forall (fun x -> x.amount = 0) b.Player2Side
-
+  
 let rec getMove (b : board) (p : player) (q : string) : pit =
+  let num = int q
   match p with
   | Player1 -> 
-    match q with 
-    | "1" -> b.Player1Side.[0]
-    | "2" -> b.Player1Side.[1]
-    | "3" -> b.Player1Side.[2]
-    | "4" -> b.Player1Side.[3]
-    | "5" -> b.Player1Side.[4]
-    | "6" -> b.Player1Side.[5]
+    match num with 
+    | num when num > 0 && num < 7 -> 
+      if b.Player1Side.[num-1].amount = 0 then 
+        System.Console.WriteLine "Please choose a pit with beans in it"
+        let input = System.Console.ReadLine()
+        getMove b p input
+      else b.Player1Side.[num-1]
     | _ ->
-      System.Console.WriteLine "Player 1 choose pit: "
+      printfn "Please give a valid input: 1-6"
       let input = System.Console.ReadLine()
       getMove b p input
   | Player2 ->
-    match q with
-    | "1" -> b.Player2Side.[0]
-    | "2" -> b.Player2Side.[1]
-    | "3" -> b.Player2Side.[2]
-    | "4" -> b.Player2Side.[3]
-    | "5" -> b.Player2Side.[4]
-    | "6" -> b.Player2Side.[5]
+    match num with
+    | num when num > 0 && num < 7 ->
+      if b.Player2Side.[6-num].amount = 0 then
+        System.Console.WriteLine "Please choose a pit with beans in it"
+        let input = System.Console.ReadLine()
+        getMove b p input
+      else b.Player2Side.[6-num]
     | _ -> 
-      System.Console.WriteLine "Player 2 choose pit: "
+      System.Console.WriteLine "Please give a valid input: 1-6"
       let input = System.Console.ReadLine()
       getMove b p input
 
@@ -124,10 +125,12 @@ let turn (b : board) (p : player) : board =
     printBoard b
     let str =
       if n = 0 then
-        sprintf "Player %A's move? " p
+        sprintf "%A's move" p
       else 
-        "Again? "
-    let i = getMove b p str
+        sprintf "%A's move again" p
+    printfn "%s" str
+    let input = System.Console.ReadLine()
+    let i = getMove b p input
     let (newB, finalPitsPlayer, finalPit)= distribute b p i
     if not (isHome b finalPitsPlayer finalPit) 
        || (isGameOver b) then
@@ -138,6 +141,9 @@ let turn (b : board) (p : player) : board =
 
 let rec play (b : board) (p : player) : board =
   if isGameOver b then
+    printBoard b
+    if (fst b.score).amount > (snd b.score).amount then printfn "Player1 wins"
+    else printfn "Player2 wins"
     b
   else
     let newB = turn b p
