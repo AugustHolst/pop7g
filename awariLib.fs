@@ -4,7 +4,7 @@ type board = {Player1Side : pit list; Player2Side : pit list; score : pit * pit}
 type player = Player1 | Player2
 
 
-let printBoard (b : board) : unit = //BAD! should use string.Concat or something else.
+let printBoard (b : board) : unit = 
   let mutable str = "   "
   List.iter (fun x -> str <- str + sprintf "%3i" x.amount) b.Player2Side
   str <- str + sprintf "\n%3i" (snd b.score).amount + "                  " + sprintf "%3i\n   " (fst b.score).amount
